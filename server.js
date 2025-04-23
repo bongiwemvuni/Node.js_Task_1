@@ -3,6 +3,39 @@ const http = require('node:http')
 const hostname = '127.0.0.1'
 const port = 3000
 
+const express = require('express');
+const path = require('path');
+const fs = require('fs');
+const { ensureDataFile, readData, writeData } = require('./data');
+
+const app = express();
+const PORT = 3000;
+
+ensureDataFile();
+
+app.use(express.json());
+app.use(express.static('public'));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.post('/data', (req, res) => {
+  const existingData = readData();
+  existingData.push(req.body);
+  writeData(existingData);
+  res.status(201).json({ message: "Data saved successfully!" });
+});
+
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
+
+app.listen(port, hostname, () => {
+  console.log(`Server running`);
+});
+
+
 let movies = ['Dune', 'Perfume','Avatar', 'Titanic']
 let series = ['This is us', 'The office', 'Parks and recs', 'Breaking bad', 'Supernatural', 'Will and Grace']
 let songs =  ['Selfish', 'All for you', 'Things will get better', 'Addicated to you']
